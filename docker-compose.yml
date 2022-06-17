@@ -1,0 +1,43 @@
+version: '3.7'
+
+services:
+  mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    volumes:
+      - ./yoursql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+  app:
+    ports:
+      - 3333:3000
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - ./app:/app
+    depends_on:
+      - mysql
+
+  nginx:
+    image: nginx
+    restart: always
+    ports:
+      - 8888:80
+    depends_on: 
+      - app
+    volumes:
+      - ./app:/app/project
+      - ./docker/nginx_log:/var/log/nginx
+      - ./docker/config:/etc/nginx/conf.d
+
+
+
+
+  
